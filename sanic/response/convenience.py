@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from email.utils import formatdate, parsedate_to_datetime
+from inspect import isawaitable
 from mimetypes import guess_type
 from os import path
 from pathlib import PurePath
@@ -281,7 +282,9 @@ async def file(
 
     async with await open_async(location, mode="rb") as f:
         if _range:
-            await f.seek(_range.start)
+            seek_ret = f.seek(_range.start)
+            if isawaitable(seek_ret):
+                await seek_ret
             out_stream = await f.read(_range.size)
             headers["Content-Range"] = (
                 f"bytes {_range.start}-{_range.end}/{_range.total}"
@@ -376,7 +379,9 @@ async def file_stream(
     async def _streaming_fn(response):
         async with await open_async(location, mode="rb") as f:
             if _range:
-                await f.seek(_range.start)
+                seek_ret = f.seek(_range.start)
+                if isawaitable(seek_ret):
+                    await seek_ret
                 to_send = _range.size
                 while to_send > 0:
                     content = await f.read(min((_range.size, chunk_size)))

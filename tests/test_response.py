@@ -15,11 +15,10 @@ from urllib.parse import unquote
 
 import pytest
 
-from aiofiles import os as async_os
 from pytest import LogCaptureFixture
 
 from sanic import Request, Sanic
-from sanic.compat import Header
+from sanic.compat import Header, stat_async
 from sanic.constants import DEFAULT_HTTP_CONTENT_TYPE
 from sanic.cookies import CookieJar
 from sanic.response import (
@@ -404,7 +403,7 @@ def test_file_head_response(app: Sanic, file_name, static_file_directory):
     async def file_route(request, filename):
         file_path = os.path.join(static_file_directory, filename)
         file_path = os.path.abspath(unquote(file_path))
-        stats = await async_os.stat(file_path)
+        stats = await stat_async(file_path)
         headers = {}
         headers["Accept-Ranges"] = "bytes"
         headers["Content-Length"] = str(stats.st_size)
@@ -488,7 +487,7 @@ def test_file_stream_head_response(
         if request.method == "HEAD":
             # Return a normal HTTPResponse, not a
             # StreamingHTTPResponse for a HEAD request
-            stats = await async_os.stat(file_path)
+            stats = await stat_async(file_path)
             headers["Content-Length"] = str(stats.st_size)
             return HTTPResponse(
                 headers=headers,

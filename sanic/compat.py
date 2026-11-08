@@ -147,8 +147,12 @@ else:
         if OS_IS_WINDOWS:
             pypy_windows_set_console_cp_patch()
 
-    from aiofiles import open as aio_open  # type: ignore
-    from aiofiles.os import stat as stat_async  # type: ignore  # noqa: F401
+    from asyncfiles import open as aio_open
+
+    async def stat_async(path) -> os.stat_result:
+        return await asyncio.get_running_loop().run_in_executor(
+            None, os.stat, path
+        )
 
     async def open_async(file, mode="r", **kwargs):
         return aio_open(file, mode, **kwargs)

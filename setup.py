@@ -119,7 +119,7 @@ requirements = [
     "httptools>=0.0.10",
     uvloop,
     ujson,
-    "aiofiles>=0.6.0",
+    "py-asyncfiles>=1.10.2",
     "websockets>=10.0",
     "multidict>=5.0,<7.0",
     "html5tagger>=1.2.1",
